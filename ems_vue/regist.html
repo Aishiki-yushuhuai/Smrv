@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+	</head>
+	<body>
+		<h4>注册</h4>
+		<form>
+			<table id="wrap">
+				<tr>
+					<td>用户名：</td>
+					<td><input type="text" v-model="user.username"></td>
+				</tr>
+				<tr>
+					<td>真实姓名：</td>
+					<td><input type="text" v-model="user.realname"></td>
+				</tr>
+				<tr>
+					<td>密码：</td>
+					<td><input type="password" v-model="user.password"></td>
+				</tr>
+				<tr>
+					<td>性别：</td>
+					<td>
+						<input type="radio" v-model="user.gender" name="gender" value="男" checked="checked" />男
+						<input type="radio" v-model="user.gender" name="gender" value="女" /> 女
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2"><input type="button" value="提交" @click="register"></td>
+				</tr>
+			</table>
+		</form>
+		
+		<script src="js/vue.js"></script>
+		<script src="js/axios.min.js"></script>
+		<script>
+			const app = new Vue({
+				el : "#wrap",
+				data : {
+					user : {},
+				},
+				methods:{
+					register(){
+						axios.post("http://localhost:8080/smrv/user/register",this.user).then(res=>{
+							console.log(res);
+							if(res.data.state){
+								alert(res.data.msg + "，点击确定跳转到登录页面");
+								window.location.href = "login.html";
+							}else{
+								alert(res.data.msg);
+							}
+						});
+					}
+				}
+			});
+		</script>
+		
+	</body>
+</html>

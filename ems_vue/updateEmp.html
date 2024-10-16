@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<div id="add">
+			<h1>Update Emp Info</h1>
+			<h4>
+				Welcome：<span v-text="username"></span>
+				<a href="javascript:;" @click="logout">安全退出</a>
+			</h4>
+			<table cellpadding="10" >
+				<tr>
+					<td>ID:</td>
+					<td v-text="emp.id"></td>
+				</tr>
+				<tr>
+					<td>old photo:</td>
+					<td><img :src="'http://localhost:8080/smrv/' + emp.path" height="50"/></td>
+				</tr>
+				<tr>
+					<td>name:</td>
+					<td><input type="text" v-model="emp.name"/></td>
+				</tr>
+				<tr>
+					<td>photo:</td>
+					<td><input type="file" ref="photo"/></td>
+				</tr>
+				<tr>
+					<td>salary</td>
+					<td><input type="number" v-model="emp.salary"/></td>
+					
+				</tr>
+				<tr>
+					<td>age:</td>
+					<td><input type="number" v-model="emp.age"/></td>
+				</tr>
+				<tr>
+					<td colspan="2" @click="editEmp"><button>提交</button></td>
+				</tr>
+			</table>
+		</div>
+
+		<script src="js/axios.min.js"></script>
+		<script src="js/vue.js"></script>
+		<script>
+			const add = new Vue({
+				el : "#add",
+				data : {
+					username : "",
+					emp : {},
+				},
+				methods:{
+					//安全退出
+					logout(){
+						//常规注销，是需要走后台的Controller，销毁session
+						localStorage.removeItem("user");
+						location.href="login.html";
+					},
+					//处理员工修改
+					editEmp(){
+						console.log(this.emp);
+						console.log(this.$refs.photo.files[0]);
+						let formData = new FormData();
+						formData.append("id",this.emp.id);
+						formData.append("name",this.emp.name);
+						formData.append("salary",this.emp.salary);
+						formData.append("age",this.emp.age);
+						//推荐去写动态sql
+						formData.append("path",this.emp.path);
+						formData.append("photo",this.$refs.photo.files[0]);
+						axios({
+							method : "put",
+							url : "http://localhost:8080/smrv/emp/update",
+							data : formData,
+							headers:{
+								'content-type':'mutipart/formdata'
+							}
+						}).then(res=>{
+							console.log(res.data);
+							if(res.data.state){
+								alert(res.data.msg + "，点击确定跳转到列表页面！");
+								location.href = "emplist.html";
+							}else{
+								alert(res.data.msg);
+							}
+						});
+					}
+				},
+				created() { //生命周期函数，在整个页面加载完毕之后执行的函数
+					let username = localStorage.getItem("user");
+					if(username){
+						this.username = username;
+					}else{
+						alert("您尚未登录，点击确定跳转到登录页！");
+						location.href = "login.html";
+					}
+					// 获取id信息
+					let start = location.href.lastIndexOf("=");
+					let id = location.href.substring(start + 1);
+					console.log(id);
+					//查询信息
+					let _this = this;
+					axios.get("http://localhost:8080/smrv/emp/findOne/" + id).then(res=>{
+						console.log(res.data)
+						_this.emp = res.data;
+						
+					});
+				}
+			});
+		</script>
+	</body>
+</html>

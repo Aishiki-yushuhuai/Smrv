@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<div id="app">
+			<h4>用户登录</h4>
+			<p>
+				帐号：<input type="text" @keydown.enter="login" v-model="user.username" />
+			</p>
+			<p>
+				密码：<input type="password" @keydown.enter="login" v-model="user.password" />
+			</p>
+			<input type="button" value="登录" @click="login" /> <a href="regist.html">注册</a>
+		</div>
+		
+		<script src="js/vue.js"></script>
+		<script src="js/axios.min.js"></script>
+		<script>
+			const app = new Vue({
+						el: "#app",
+						data: {
+							user: {}
+						},
+						methods: {
+							login() {
+								axios.post("http://localhost:8080/smrv/user/login", this.user).then(res => {
+										console.log(res);
+										if(res.data.state){
+											alert(res.data.msg + "，点击确定进入主页");
+											//将用户登录信息放入到localStorage中
+											//localStorage是一个前端的小型“数据库”  本地储存空间
+											localStorage.setItem("user",res.data.user);
+											window.location.href = "emplist.html";
+										}else{
+											alert(res.data.msg);
+										}
+									})
+								}
+							}
+						});
+		</script>
+		
+	</body>
+</html>

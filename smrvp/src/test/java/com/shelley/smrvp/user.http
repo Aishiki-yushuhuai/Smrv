@@ -1,0 +1,5 @@
+POST http://localhost:8080/smrv/user/register
+Content-Type: application/x-www-form-urlencoded
+
+username=zhangshan&password=123456&gender=男&realname=张三
+###
