@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Excel操作系统</title>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.15.13/theme-chalk/index.css">
+		<style>
+			.header {
+				display: flex;
+				align-items: center;
+				padding: 10px 20px;
+				background-color: #f5f7fa;
+				border-bottom: 1px solid #dcdfe6;
+			}
+			.logo {
+				width: 120px;
+				margin-right: 50px;
+			}
+			.nav-menu {
+				flex-grow: 1;
+			}
+			.user-info {
+				margin-left: 20px;
+			}
+			.main-content {
+				padding: 20px;
+			}
+			.upload-section {
+				margin-bottom: 20px;
+			}
+			.column-selection {
+				margin: 20px 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<!-- 头部导航 -->
+			<div class="header">
+				<div class="logo">
+					<img src="path/to/your/logo.png" alt="Logo" height="40">
+				</div>
+				<el-menu class="nav-menu" mode="horizontal" default-active="1">
+					<el-menu-item index="1">Excel操作</el-menu-item>
+				</el-menu>
+				<div class="user-info">
+					<span>欢迎：{{username}}</span>
+					<el-button type="text" @click="logout">退出</el-button>
+				</div>
+			</div>
+
+			<!-- 主要内容区 -->
+			<div class="main-content">
+				<!-- Excel上传区域 -->
+				<div class="upload-section">
+					<el-upload
+						class="upload-demo"
+						action="http://localhost:8765/smrv/excel/upload"
+						:on-success="handleUploadSuccess"
+						:limit="2"
+						multiple>
+						<el-button type="primary">上传Excel文件</el-button>
+						<div slot="tip">请上传两个Excel文件进行对比</div>
+					</el-upload>
+				</div>
+
+				<!-- 列选择和操作区域 -->
+				<div class="column-selection" v-if="columns.length > 0">
+					<el-form :model="operationForm" label-width="120px">
+						<!-- 第一个文件列选择 -->
+						<el-form-item label="第一个文件列名">
+							<el-select v-model="operationForm.firstColumn" placeholder="请选择列名">
+								<el-option
+									v-for="col in columns"
+									:key="col"
+									:label="col"
+									:value="col">
+								</el-option>
+							</el-select>
+						</el-form-item>
+
+						<!-- 第二个文件列选择 -->
+						<el-form-item label="第二个文件列名">
+							<el-select v-model="operationForm.secondColumn" placeholder="请选择列名">
+								<el-option
+									v-for="col in columns2"
+									:key="col"
+									:label="col"
+									:value="col">
+								</el-option>
+							</el-select>
+						</el-form-item>
+
+						<!-- 筛选条件列选择 -->
+						<el-form-item label="筛选条件列">
+							<el-select v-model="operationForm.filterColumns" multiple placeholder="请选择筛选列">
+								<el-option
+									v-for="col in columns"
+									:key="col"
+									:label="col"
+									:value="col">
+								</el-option>
+							</el-select>
+						</el-form-item>
+
+						<el-form-item>
+							<el-button type="primary" @click="handleCompare">开始比对</el-button>
+						</el-form-item>
+					</el-form>
+				</div>
+
+				<!-- 结果展示区域 -->
+				<div class="result-section" v-if="compareResults.length > 0">
+					<el-table :data="compareResults" border>
+						<el-table-column
+							v-for="col in selectedColumns"
+							:key="col"
+							:prop="col"
+							:label="col">
+						</el-table-column>
+					</el-table>
+				</div>
+			</div>
+		</div>
+
+		<script src="js/vue.js"></script>
+		<script src="js/axios.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.15.13/index.js"></script>
+		<script>
+			new Vue({
+				el: '#app',
+				data: {
+					username: '',
+					columns: [], // 第一个文件的列名
+					columns2: [], // 第二个文件的列名
+					operationForm: {
+						firstColumn: '',
+						secondColumn: '',
+						filterColumns: []
+					},
+					compareResults: [],
+					selectedColumns: []
+				},
+				methods: {
+					logout() {
+						localStorage.removeItem("user");
+						location.href = "login.html";
+					},
+					handleUploadSuccess(response, file, fileList) {
+						if (fileList.length === 1) {
+							this.columns = response.columns;
+						} else if (fileList.length === 2) {
+							this.columns2 = response.columns;
+						}
+					},
+					handleCompare() {
+						// 发送比对请求
+						axios.post('http://localhost:8765/smrv/excel/compare', {
+							firstColumn: this.operationForm.firstColumn,
+							secondColumn: this.operationForm.secondColumn,
+							filterColumns: this.operationForm.filterColumns
+						}).then(res => {
+							if (res.data.success) {
+								this.compareResults = res.data.results;
+								this.selectedColumns = [...this.operationForm.filterColumns];
+							} else {
+								this.$message.error(res.data.message);
+							}
+						});
+					}
+				},
+				created() {
+					let username = localStorage.getItem("user");
+					if (username) {
+						this.username = username;
+					} else {
+						this.$message.error('您尚未登录，即将跳转到登录页！');
+						location.href = "login.html";
+					}
+				}
+			});
+		</script>
+	</body>
+</html>

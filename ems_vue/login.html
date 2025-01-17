@@ -2,20 +2,39 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title></title>
+		<title>ログインシステム</title>
+		<link rel="stylesheet" href="css/login.css">
 	</head>
 	<body>
-		<div id="app">
-			<h4>用户登录</h4>
-			<p>
-				帐号：<input type="text" @keydown.enter="login" v-model="user.username" />
-			</p>
-			<p>
-				密码：<input type="password" @keydown.enter="login" v-model="user.password" />
-			</p>
-			<input type="button" value="登录" @click="login" /> <a href="regist.html">注册</a>
+		<div class="container">
+			<div class="login-box">
+				<div class="login-header">
+					<h2>ログインへようこそ</h2>
+					<p>Welcome Back!</p>
+				</div>
+				<div id="app" class="login-form">
+					<div class="input-group">
+						<label for="username">
+							<i class="fas fa-user"></i>
+						</label>
+						<input type="text" id="username" @keydown.enter="login" v-model="user.username" placeholder="ユーザー名を入力してください" />
+					</div>
+					<div class="input-group">
+						<label for="password">
+							<i class="fas fa-lock"></i>
+						</label>
+						<input type="password" id="password" @keydown.enter="login" v-model="user.password" placeholder="パスワードを入力してください" />
+					</div>
+					<button class="login-btn" @click="login">ログイン</button>
+					<div class="links">
+						<a href="regist.html" class="register-link">アカウント登録</a>
+					</div>
+				</div>
+			</div>
 		</div>
-		
+
+		<!-- 引入Font Awesome图标 -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 		<script src="js/vue.js"></script>
 		<script src="js/axios.min.js"></script>
 		<script>
@@ -26,14 +45,14 @@
 						},
 						methods: {
 							login() {
-								axios.post("http://localhost:8080/smrv/user/login", this.user).then(res => {
+								axios.post("http://localhost:8765/smrv/user/login", this.user).then(res => {
 										console.log(res);
 										if(res.data.state){
 											alert(res.data.msg + "，点击确定进入主页");
 											//将用户登录信息放入到localStorage中
-											//localStorage是一个前端的小型“数据库”  本地储存空间
+											//localStorage是一个前端的小型"数据库"  本地储存空间
 											localStorage.setItem("user",res.data.user);
-											window.location.href = "emplist.html";
+											window.location.href = "excelist.html";
 										}else{
 											alert(res.data.msg);
 										}

@@ -1,54 +1,77 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="utf-8" />
-		<title></title>
+		<meta charset="utf-8">
+		<title>アカウント登録</title>
+		<link rel="stylesheet" href="css/register.css">
 	</head>
 	<body>
-		<h4>注册</h4>
-		<form>
-			<table id="wrap">
-				<tr>
-					<td>用户名：</td>
-					<td><input type="text" v-model="user.username"></td>
-				</tr>
-				<tr>
-					<td>真实姓名：</td>
-					<td><input type="text" v-model="user.realname"></td>
-				</tr>
-				<tr>
-					<td>密码：</td>
-					<td><input type="password" v-model="user.password"></td>
-				</tr>
-				<tr>
-					<td>性别：</td>
-					<td>
-						<input type="radio" v-model="user.gender" name="gender" value="男" checked="checked" />男
-						<input type="radio" v-model="user.gender" name="gender" value="女" /> 女
-					</td>
-				</tr>
-				<tr>
-					<td colspan="2"><input type="button" value="提交" @click="register"></td>
-				</tr>
-			</table>
-		</form>
-		
+		<div class="container">
+			<div class="login-box">
+				<div class="login-header">
+					<h2>アカウント登録</h2>
+					<p>Create Your Account</p>
+				</div>
+				<div id="wrap" class="login-form">
+					<div class="input-group">
+						<label for="username">
+							<i class="fas fa-user"></i>
+						</label>
+						<input type="text" id="username" v-model="user.username" placeholder="ユーザー名を入力してください" />
+					</div>
+					<div class="input-group">
+						<label for="realname">
+							<i class="fas fa-id-card"></i>
+						</label>
+						<input type="text" id="realname" v-model="user.realname" placeholder="本名を入力してください" />
+					</div>
+					<div class="input-group">
+						<label for="password">
+							<i class="fas fa-lock"></i>
+						</label>
+						<input type="password" id="password" v-model="user.password" placeholder="パスワードを入力してください" />
+					</div>
+					<div class="gender-group">
+						<label>
+							<i class="fas fa-venus-mars"></i>
+						</label>
+						<div class="radio-options">
+							<label>
+								<input type="radio" v-model="user.gender" name="gender" value="男" checked="checked" />
+								男性
+							</label>
+							<label>
+								<input type="radio" v-model="user.gender" name="gender" value="女" />
+								女性
+							</label>
+						</div>
+					</div>
+					<button class="login-btn" @click="register">登録する</button>
+					<div class="links">
+						<a href="login.html" class="register-link">ログインページへ戻る</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Font Awesome -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 		<script src="js/vue.js"></script>
 		<script src="js/axios.min.js"></script>
 		<script>
 			const app = new Vue({
-				el : "#wrap",
-				data : {
-					user : {},
+				el: "#wrap",
+				data: {
+					user: {},
 				},
-				methods:{
-					register(){
-						axios.post("http://localhost:8080/smrv/user/register",this.user).then(res=>{
+				methods: {
+					register() {
+						axios.post("http://localhost:8765/smrv/user/register", this.user).then(res => {
 							console.log(res);
-							if(res.data.state){
-								alert(res.data.msg + "，点击确定跳转到登录页面");
+							if (res.data.state) {
+								alert(res.data.msg + "，ログインページへ移動します");
 								window.location.href = "login.html";
-							}else{
+							} else {
 								alert(res.data.msg);
 							}
 						});
@@ -56,6 +79,5 @@
 				}
 			});
 		</script>
-		
 	</body>
 </html>
