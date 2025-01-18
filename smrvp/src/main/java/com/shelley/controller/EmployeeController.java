@@ -34,6 +34,13 @@ public class EmployeeController {
         return iEmployeeService.findOne(id);
     }
 
+    /**
+     * update
+     * @param employee
+     * @param photo
+     * @return
+     */
+
     @PutMapping("update")
     public Map<String, Object> update(Employee employee, /*@RequestParam(value = "photo", required = false)*/ MultipartFile photo){
         Map<String, Object> map = new HashMap<>();
