@@ -66,7 +66,7 @@
 				},
 				methods: {
 					register() {
-						axios.post("http://localhost:8765/smrv/user/register", this.user).then(res => {
+						axios.post("http://yourip:7474/smrv/user/register", this.user).then(res => {
 							console.log(res);
 							if (res.data.state) {
 								alert(res.data.msg + "，ログインページへ移動します");

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<h1>Emp List</h1>
+		<div id="add">
+			<h4>
+				Welcome：<span v-text="username"></span>
+				<a href="javascript:;" @click="logout">安全退出</a>
+			</h4>
+			<table border="1" cellpadding="10" cellspacing="0">
+				<tr>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Photo</th>
+					<th>Salary</th>
+					<th>Age</th>
+					<th>Manager</th>
+				</tr>
+				<tr v-for="(emp,index) in emps" :key="emp.id">
+					<td>{{emp.id}}</td>
+					<td>{{emp.name}}</td>
+					<td><img :src="'http://yourip:7474/smrv/' + emp.path" height="50"></td>
+					<td>{{emp.salary}}</td>
+					<td>{{emp.age}}</td>
+					<td>
+						<a href="javascript:;" @click="delEmp(emp.id)">删除</a>
+						<a :href="'updateEmp.html?id='+emp.id">修改</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<a href="addEmp.html">Add Employee</a>	
+		<script src="js/axios.min.js"></script>
+		<script src="js/vue.js"></script>
+		<script>
+			const add = new Vue({
+				el : "#add",
+				data : {
+					username : "",
+					emps : {},
+				},
+				methods:{
+					logout(){
+						//常规注销，是需要走后台的Controller，销毁session
+						localStorage.removeItem("user");
+						location.href="login.html";
+					},
+					//删除员工的操作
+					delEmp(id){
+						if(confirm("是否确认删除？")){
+							axios.delete("http://yourip:7474/smrv/emp/delete/" + id).then(res =>{
+								if(res.data.state){
+									alert(res.data.msg);
+									//刷新页面
+									this.findAll();
+								}else{
+									alert(res.data.msg);
+								}
+							})
+						}
+					},
+					findAll(){
+						axios.get("http://yourip:7474/smrv/emp/findAll").then(res=>{
+							this.emps = res.data
+						});
+					}
+				},
+				created() { //生命周期函数，在整个页面加载完毕之后执行的函数
+					let username = localStorage.getItem("user");
+					if(username){
+						this.username = username;
+					}else{
+						alert("您尚未登录，点击确定跳转到登录页！");
+						location.href = "login.html";
+					}
+					//查询所有信息
+					this.findAll();
+				}
+			});
+		</script>
+	</body>
+</html>

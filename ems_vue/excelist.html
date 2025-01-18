@@ -4,123 +4,183 @@
 		<meta charset="utf-8">
 		<title>Excel操作系统</title>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.15.13/theme-chalk/index.css">
-		<style>
-			.header {
-				display: flex;
-				align-items: center;
-				padding: 10px 20px;
-				background-color: #f5f7fa;
-				border-bottom: 1px solid #dcdfe6;
-			}
-			.logo {
-				width: 120px;
-				margin-right: 50px;
-			}
-			.nav-menu {
-				flex-grow: 1;
-			}
-			.user-info {
-				margin-left: 20px;
-			}
-			.main-content {
-				padding: 20px;
-			}
-			.upload-section {
-				margin-bottom: 20px;
-			}
-			.column-selection {
-				margin: 20px 0;
-			}
-		</style>
+		<link rel="stylesheet" href="css/excelist.css">
 	</head>
 	<body>
 		<div id="app">
-			<!-- 头部导航 -->
-			<div class="header">
-				<div class="logo">
-					<img src="path/to/your/logo.png" alt="Logo" height="40">
-				</div>
-				<el-menu class="nav-menu" mode="horizontal" default-active="1">
-					<el-menu-item index="1">Excel操作</el-menu-item>
-				</el-menu>
-				<div class="user-info">
-					<span>欢迎：{{username}}</span>
-					<el-button type="text" @click="logout">退出</el-button>
-				</div>
-			</div>
+			<!-- 头部导航优化 -->
+			<el-container>
+				<el-header>
+					<div class="header">
+						<div class="logo">
+							<img src="path/to/your/logo.png" alt="Logo" height="40">
+						</div>
+						<el-menu class="nav-menu" mode="horizontal" default-active="1">
+							<el-menu-item index="1">Excel文件比对系统</el-menu-item>
+						</el-menu>
+						<div class="user-info">
+							<el-dropdown @command="handleCommand">
+								<span class="el-dropdown-link">
+									{{username}}<i class="el-icon-arrow-down el-icon--right"></i>
+								</span>
+								<el-dropdown-menu slot="dropdown">
+									<el-dropdown-item command="logout">退出登录</el-dropdown-item>
+								</el-dropdown-menu>
+							</el-dropdown>
+						</div>
+					</div>
+				</el-header>
 
-			<!-- 主要内容区 -->
-			<div class="main-content">
-				<!-- Excel上传区域 -->
-				<div class="upload-section">
-					<el-upload
-						class="upload-demo"
-						action="http://localhost:8765/smrv/excel/upload"
-						:on-success="handleUploadSuccess"
-						:limit="2"
-						multiple>
-						<el-button type="primary">上传Excel文件</el-button>
-						<div slot="tip">请上传两个Excel文件进行对比</div>
-					</el-upload>
-				</div>
+				<!-- 主要内容区优化 -->
+				<el-main>
+					<el-card class="excel-container">
+						<!-- 文件上传区域优化 -->
+						<div class="upload-area">
+							<el-row :gutter="20">
+								<el-col :span="12">
+									<el-upload
+										class="excel-uploader"
+										action="http://yourip:7474/smrv/excel/upload"
+										:on-success="handleUploadSuccess"
+										:on-error="handleUploadError"
+										:before-upload="beforeUpload"
+										:on-remove="handleRemove"
+										:file-list="uploadedFiles"
+										:show-file-list="false"
+										multiple
+										:limit="2"
+										accept=".xlsx,.xls"
+										drag>
+										<i class="el-icon-upload"></i>
+										<div class="el-upload__text">将Excel文件拖到此处，或<em>点击上传</em></div>
+										<div class="el-upload__tip" slot="tip">
+											支持 .xlsx, .xls 格式，文件大小不超过 {{uploadRules.maxSize}}MB
+										</div>
+									</el-upload>
+								</el-col>
+								<el-col :span="12">
+									<div class="file-list-container">
+										<h3>已上传文件</h3>
+										<el-table :data="uploadedFiles" style="width: 100%">
+											<el-table-column prop="name" label="文件名"></el-table-column>
+											<el-table-column width="100">
+												<template slot-scope="scope">
+													<el-button type="text" @click="handleRemove(scope.row)">
+														删除
+													</el-button>
+												</template>
+											</el-table-column>
+										</el-table>
+									</div>
+								</el-col>
+							</el-row>
+						</div>
 
-				<!-- 列选择和操作区域 -->
-				<div class="column-selection" v-if="columns.length > 0">
-					<el-form :model="operationForm" label-width="120px">
-						<!-- 第一个文件列选择 -->
-						<el-form-item label="第一个文件列名">
-							<el-select v-model="operationForm.firstColumn" placeholder="请选择列名">
-								<el-option
-									v-for="col in columns"
+						<!-- 列选择和操作区域 -->
+						<div class="column-selection" v-if="columns.length > 0">
+							<el-form :model="operationForm" label-width="120px" class="comparison-form">
+								<el-form-item label="第一个文件列名">
+									<el-select v-model="operationForm.firstColumn" placeholder="请选择列名">
+										<el-option
+											v-for="col in firstFileColumns"
+											:key="col.value"
+											:label="col.label"
+											:value="col.value">
+										</el-option>
+									</el-select>
+									<div class="selected-file-info" v-if="fileData.first.fileName">
+										当前文件：{{fileData.first.fileName}}
+									</div>
+								</el-form-item>
+
+								<el-form-item label="第二个文件列名">
+									<el-select v-model="operationForm.secondColumn" placeholder="请选择列名">
+										<el-option
+											v-for="col in secondFileColumns"
+											:key="col.value"
+											:label="col.label"
+											:value="col.value">
+										</el-option>
+									</el-select>
+									<div class="selected-file-info" v-if="fileData.second.fileName">
+										当前文件：{{fileData.second.fileName}}
+									</div>
+								</el-form-item>
+
+								<el-form-item label="比较方式">
+									<el-select v-model="operationForm.compareLogic" placeholder="请选择比较方式">
+										<el-option
+											v-for="option in compareLogicOptions"
+											:key="option.value"
+											:label="option.label"
+											:value="option.value">
+										</el-option>
+									</el-select>
+								</el-form-item>
+
+								<el-form-item label="选择显示的列">
+									<el-select
+										v-model="operationForm.filterColumns"
+										multiple
+										placeholder="请选择要显示的列">
+										<el-option
+											v-for="col in [...new Set([...columns, ...columns2])]"
+											:key="col"
+											:label="col"
+											:value="col">
+										</el-option>
+									</el-select>
+								</el-form-item>
+
+								<el-form-item>
+									<el-button 
+										type="primary" 
+										@click="handleCompare" 
+										:loading="loading"
+										:disabled="!operationForm.firstColumn || !operationForm.secondColumn || !operationForm.filterColumns.length">
+										开始比对
+									</el-button>
+									<el-button @click="resetForm">重置</el-button>
+								</el-form-item>
+							</el-form>
+						</div>
+
+						<!-- 结果展示区域优化 -->
+						<div v-if="compareResults.length > 0" class="result-section">
+							<div class="result-header">
+								<el-alert
+									:title="`比对完成，共找到 ${compareResults.length} 条匹配记录`"
+									type="success"
+									:closable="false"
+									show-icon>
+								</el-alert>
+								<el-button 
+									type="primary" 
+									icon="el-icon-download" 
+									@click="downloadResults"
+									:loading="downloading">
+									下载比对结果
+								</el-button>
+							</div>
+							
+							<el-table
+								:data="compareResults"
+								border
+								stripe
+								style="width: 100%; margin-top: 20px"
+								max-height="500">
+								<el-table-column
+									v-for="col in Object.keys(compareResults[0] || {})"
 									:key="col"
+									:prop="col"
 									:label="col"
-									:value="col">
-								</el-option>
-							</el-select>
-						</el-form-item>
-
-						<!-- 第二个文件列选择 -->
-						<el-form-item label="第二个文件列名">
-							<el-select v-model="operationForm.secondColumn" placeholder="请选择列名">
-								<el-option
-									v-for="col in columns2"
-									:key="col"
-									:label="col"
-									:value="col">
-								</el-option>
-							</el-select>
-						</el-form-item>
-
-						<!-- 筛选条件列选择 -->
-						<el-form-item label="筛选条件列">
-							<el-select v-model="operationForm.filterColumns" multiple placeholder="请选择筛选列">
-								<el-option
-									v-for="col in columns"
-									:key="col"
-									:label="col"
-									:value="col">
-								</el-option>
-							</el-select>
-						</el-form-item>
-
-						<el-form-item>
-							<el-button type="primary" @click="handleCompare">开始比对</el-button>
-						</el-form-item>
-					</el-form>
-				</div>
-
-				<!-- 结果展示区域 -->
-				<div class="result-section" v-if="compareResults.length > 0">
-					<el-table :data="compareResults" border>
-						<el-table-column
-							v-for="col in selectedColumns"
-							:key="col"
-							:prop="col"
-							:label="col">
-						</el-table-column>
-					</el-table>
-				</div>
-			</div>
+									show-overflow-tooltip>
+								</el-table-column>
+							</el-table>
+						</div>
+					</el-card>
+				</el-main>
+			</el-container>
 		</div>
 
 		<script src="js/vue.js"></script>
@@ -129,50 +189,318 @@
 		<script>
 			new Vue({
 				el: '#app',
-				data: {
-					username: '',
-					columns: [], // 第一个文件的列名
-					columns2: [], // 第二个文件的列名
-					operationForm: {
-						firstColumn: '',
-						secondColumn: '',
-						filterColumns: []
-					},
-					compareResults: [],
-					selectedColumns: []
+				data() {
+					return {
+						username: '',
+						uploadedFiles: [], // 存储上传的文件列表
+						columns: [], // 第一个文件的列名
+						columns2: [], // 第二个文件的列名
+						operationForm: {
+							firstColumn: '',
+							secondColumn: '',
+							compareLogic: 'equals', // 默认使用相等比较
+							filterColumns: []
+						},
+						compareResults: [],
+						selectedColumns: [],
+						downloadId: '',
+						downloading: false,
+						loading: false,
+						// 添加上传规则配置
+						uploadRules: {
+							maxSize: 10, // 最大文件大小（MB）
+							allowedTypes: ['.xlsx', '.xls']
+						},
+						// 比较逻辑选项
+						compareLogicOptions: [
+							{ value: 'equals', label: '等于' },
+							{ value: 'greater', label: '大于' },
+							{ value: 'greaterOrEquals', label: '大于等于' },
+							{ value: 'less', label: '小于' },
+							{ value: 'lessOrEquals', label: '小于等于' }
+						],
+						fileData: {
+							first: {
+								fileName: '',
+								columns: []
+							},
+							second: {
+								fileName: '',
+								columns: []
+							}
+						}
+					}
 				},
 				methods: {
+					handleCommand(command) {
+						if (command === 'logout') {
+							this.logout();
+						}
+					},
+					beforeUpload(file) {
+						// 文件类型检查
+						const isExcel = this.uploadRules.allowedTypes.some(type => 
+							file.name.toLowerCase().endsWith(type)
+						);
+						if (!isExcel) {
+							this.$message.error('只能上传Excel文件！');
+							return false;
+						}
+
+						// 文件大小检查
+						const isLtMaxSize = file.size / 1024 / 1024 < this.uploadRules.maxSize;
+						if (!isLtMaxSize) {
+							this.$message.error(`文件大小不能超过 ${this.uploadRules.maxSize}MB！`);
+							return false;
+						}
+
+						return true;
+					},
+					handleUploadError(err, file, fileList) {
+						this.$message.error('文件上传失败，请重试');
+						console.error('Upload error:', err);
+						// 从文件列表中移除上传失败的文件
+						const index = fileList.indexOf(file);
+						if (index !== -1) {
+							fileList.splice(index, 1);
+						}
+					},
 					logout() {
 						localStorage.removeItem("user");
 						location.href = "login.html";
 					},
 					handleUploadSuccess(response, file, fileList) {
-						if (fileList.length === 1) {
-							this.columns = response.columns;
-						} else if (fileList.length === 2) {
-							this.columns2 = response.columns;
+						if (response.success) {
+							this.$message.success(`文件 ${file.name} 上传成功`);
+							
+							// 根据上传顺序明确区分第一个和第二个文件
+							if (fileList.length === 1) {
+								this.fileData.first.fileName = file.name;
+								this.fileData.first.columns = response.data.columns;
+								this.columns = response.data.columns;
+							} else if (fileList.length === 2) {
+								this.fileData.second.fileName = file.name;
+								this.fileData.second.columns = response.data.columns;
+								this.columns2 = response.data.columns;
+							}
+
+							this.uploadedFiles = fileList;
+							console.log('=== 文件上传状态 ===');
+							console.log('第一个文件:', this.fileData.first);
+							console.log('第二个文件:', this.fileData.second);
+							console.log('===================');
+						} else {
+							this.$message.error(response.message);
+							const index = fileList.indexOf(file);
+							if (index !== -1) {
+								fileList.splice(index, 1);
+							}
 						}
 					},
-					handleCompare() {
-						// 发送比对请求
-						axios.post('http://localhost:8765/smrv/excel/compare', {
-							firstColumn: this.operationForm.firstColumn,
-							secondColumn: this.operationForm.secondColumn,
-							filterColumns: this.operationForm.filterColumns
-						}).then(res => {
-							if (res.data.success) {
-								this.compareResults = res.data.results;
-								this.selectedColumns = [...this.operationForm.filterColumns];
+					handleRemove(file) {
+						// 处理文件移除
+						if (file.name === this.fileData.first.fileName) {
+							this.fileData.first = { fileName: '', columns: [] };
+							this.columns = [];
+						} else if (file.name === this.fileData.second.fileName) {
+							this.fileData.second = { fileName: '', columns: [] };
+							this.columns2 = [];
+						}
+
+						const index = this.uploadedFiles.indexOf(file);
+						if (index !== -1) {
+							this.uploadedFiles.splice(index, 1);
+						}
+						this.$message.info(`已移除文件 ${file.name}`);
+					},
+					removeFile(index) {
+						this.uploadedFiles.splice(index, 1);
+					},
+					async handleCompare() {
+						if (!this.operationForm.firstColumn || !this.operationForm.secondColumn || !this.operationForm.filterColumns.length) {
+							this.$message.warning('请完整填写比对条件');
+							return;
+						}
+
+						try {
+							this.loading = true;
+							const params = {
+								firstColumn: this.operationForm.firstColumn,
+								secondColumn: this.operationForm.secondColumn,
+								filterColumns: this.operationForm.filterColumns,
+								compareLogic: this.operationForm.compareLogic,
+								// 添加文件信息
+								firstFile: this.fileData.first.fileName,
+								secondFile: this.fileData.second.fileName
+							};
+
+							console.log('=== 比对请求参数详情 ===');
+							console.log('第一个文件:', this.fileData.first.fileName);
+							console.log('第二个文件:', this.fileData.second.fileName);
+							console.log('参数对象:', params);
+							console.log('JSON 字符串:', JSON.stringify(params, null, 2));
+							console.log('========================');
+
+							const response = await axios.post('http://yourip:7474/smrv/excel/compare', params);
+							
+							console.log('接收到比对响应：', response.data);
+							
+							if (response.data.success) {
+								const results = response.data.data.results || [];
+								
+								if (results.length === 0) {
+									this.$message.warning('未找到匹配的数据');
+									this.compareResults = [];
+								} else {
+									this.compareResults = results;
+									this.downloadId = response.data.data.downloadId;
+									this.$message.success(`比对完成！共找到 ${results.length} 条匹配记录`);
+								}
+								
+								console.log('比对结果：', this.compareResults);
 							} else {
-								this.$message.error(res.data.message);
+								this.$message.error(response.data.message || '比对失败');
+								this.compareResults = [];
+							}
+						} catch (error) {
+							console.error('比对错误：', error);
+							this.$message.error('比对过程发生错误，请重试');
+							this.compareResults = [];
+						} finally {
+							this.loading = false;
+						}
+					},
+					async downloadResults() {
+						if (!this.downloadId) {
+							this.$message.error('下载ID不存在，请重新比对');
+							return;
+						}
+
+						try {
+							this.downloading = true;
+							window.location.href = `http://yourip:7474/smrv/excel/download/${this.downloadId}`;
+							this.$message.success('开始下载比对结果');
+						} catch (error) {
+							console.error('下载错误：', error);
+							this.$message.error('下载失败，请重试');
+						} finally {
+							setTimeout(() => {
+								this.downloading = false;
+							}, 1000);
+						}
+					},
+					resetForm() {
+						this.operationForm = {
+							firstColumn: '',
+							secondColumn: '',
+							compareLogic: 'equals',
+							filterColumns: []
+						};
+						this.compareResults = [];
+						this.downloadId = '';
+					},
+					// 获取已上传的文件列表
+					async fetchUploadedFiles() {
+						try {
+							const response = await axios.get('http://yourip:7474/smrv/excel/files');
+							if (response.data.success) {
+								const files = response.data.data;
+								// 更新文件列表和对应的列信息
+								this.uploadedFiles = files.map(file => ({
+									name: file.fileName,
+									// 添加其他需要的文件属性
+								}));
+								
+								// 如果有文件，更新对应的列信息
+								if (files.length > 0) {
+									if (files[0]) {
+										this.fileData.first.fileName = files[0].fileName;
+										this.fileData.first.columns = files[0].columns;
+										this.columns = files[0].columns;
+									}
+									if (files[1]) {
+										this.fileData.second.fileName = files[1].fileName;
+										this.fileData.second.columns = files[1].columns;
+										this.columns2 = files[1].columns;
+									}
+								}
+							} else {
+								this.$message.warning(response.data.message || '获取文件列表失败');
+							}
+						} catch (error) {
+							console.error('获取文件列表错误：', error);
+							this.$message.error('获取文件列表失败，请刷新页面重试');
+						}
+					}
+				},
+				computed: {
+					getAllColumns() {
+						// 创建一个 Set 来存储唯一的列名
+						const uniqueColumns = new Set();
+						
+						// 添加第一个文件的列名
+						this.columns.forEach(col => {
+							if (this.columns2.includes(col)) {
+								// 如果列名在两个文件中都存在，添加带文件名的列名
+								uniqueColumns.add(`${col} (${this.uploadedFiles[0]?.name || '文件1'})`);
+								uniqueColumns.add(`${col} (${this.uploadedFiles[1]?.name || '文件2'})`);
+							} else {
+								// 如果列名只在第一个文件中存在
+								uniqueColumns.add(col);
 							}
 						});
+						
+						// 添加第二个文件中独有的列名
+						this.columns2.forEach(col => {
+							if (!this.columns.includes(col)) {
+								uniqueColumns.add(col);
+							}
+						});
+						
+						// 转换为数组并排序
+						return Array.from(uniqueColumns).sort();
+					},
+					autoLabelWidth() {
+						// 创建临时 span 元素来计算文本宽度
+						const span = document.createElement('span');
+						span.style.visibility = 'hidden';
+						span.style.position = 'absolute';
+						span.style.fontSize = '14px'; // 与 Element UI 默认字体大小一致
+						document.body.appendChild(span);
+						
+						// 计算最长标签的宽度
+						let maxWidth = 0;
+						this.formLabels.forEach(label => {
+							span.textContent = label;
+							maxWidth = Math.max(maxWidth, span.offsetWidth);
+						});
+						
+						// 删除临时元素
+						document.body.removeChild(span);
+						
+						// 添加适当的内边距
+						return (maxWidth + 20) + 'px';
+					},
+					// 显示带文件名的列选项
+					firstFileColumns() {
+						return this.columns.map(col => ({
+							label: `${col} (${this.fileData.first.fileName})`,
+							value: col
+						}));
+					},
+					secondFileColumns() {
+						return this.columns2.map(col => ({
+							label: `${col} (${this.fileData.second.fileName})`,
+							value: col
+						}));
 					}
 				},
 				created() {
 					let username = localStorage.getItem("user");
 					if (username) {
 						this.username = username;
+						// 获取已上传的文件列表
+						this.fetchUploadedFiles();
 					} else {
 						this.$message.error('您尚未登录，即将跳转到登录页！');
 						location.href = "login.html";
@@ -180,5 +508,63 @@
 				}
 			});
 		</script>
+
+		<style>
+			/* 结果区域样式优化 */
+			.result-section {
+				margin-top: 20px;
+				padding: 20px;
+				background: #fff;
+				border-radius: 4px;
+				box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+			}
+
+			.result-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 20px;
+			}
+
+			.result-header .el-alert {
+				margin-right: 20px;
+				flex: 1;
+			}
+
+			.el-table {
+				margin-top: 20px;
+			}
+
+			/* 添加按钮样式 */
+			.comparison-form .el-form-item:last-child {
+				margin-top: 20px;
+				text-align: center;
+			}
+
+			.comparison-form .el-button {
+				min-width: 120px;
+				margin: 0 10px;
+			}
+
+			/* 确保表单项之间有足够间距 */
+			.comparison-form .el-form-item {
+				margin-bottom: 22px;
+			}
+
+			/* 优化选择器宽度 */
+			.comparison-form .el-select {
+				width: 100%;
+			}
+
+			.selected-file-info {
+				font-size: 12px;
+				color: #909399;
+				margin-top: 5px;
+			}
+
+			.el-select {
+				width: 100%;
+			}
+		</style>
 	</body>
 </html>

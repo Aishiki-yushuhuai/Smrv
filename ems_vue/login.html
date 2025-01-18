@@ -45,7 +45,7 @@
 						},
 						methods: {
 							login() {
-								axios.post("http://localhost:8765/smrv/user/login", this.user).then(res => {
+								axios.post("http://yourip:7474/smrv/user/login", this.user).then(res => {
 										console.log(res);
 										if(res.data.state){
 											alert(res.data.msg + "，点击确定进入主页");
