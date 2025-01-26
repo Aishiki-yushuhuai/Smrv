@@ -79,26 +79,76 @@ body {
 }
 
 /* 上传区域样式 */
-.upload-section {
-    margin-bottom: 30px;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    text-align: center;
+.upload-area {
+    display: flex;
+    gap: 20px;
+    min-height: 300px;
 }
 
-.upload-section .el-upload {
+/* 左侧上传区域样式 */
+.upload-left {
+    flex: 1;
+    min-width: 400px;
+}
+
+.excel-uploader {
     width: 100%;
 }
 
-.upload-section .el-button {
-    padding: 12px 25px;
-    font-size: 16px;
+.el-upload-dragger {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #d3d3d3;
+    border-radius: 4px;
+    background-color: #f8f9fa;
 }
 
-.upload-section .el-upload__tip {
+.el-icon-upload {
+    font-size: 48px;
+    color: #909399;
+    margin-bottom: 15px;
+}
+
+.el-upload__text {
     color: #606266;
-    margin-top: 10px;
+    font-size: 14px;
+    margin: 8px 0;
+}
+
+.el-upload__text em {
+    color: #409EFF;
+    font-style: normal;
+    cursor: pointer;
+}
+
+.el-upload__tip {
+    font-size: 12px;
+    color: #909399;
+}
+
+/* 右侧文件列表样式 */
+.upload-right {
+    width: 300px;
+    border-left: 1px solid #EBEEF5;
+    padding-left: 20px;
+}
+
+.file-list-container {
+    padding: 24px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #ebeef5;
+}
+
+.file-list-container h3 {
+    margin: 0 0 16px 0;
+    color: #303133;
+    font-size: 16px;
+    font-weight: 600;
 }
 
 /* 列选择区域样式 */
@@ -193,69 +243,6 @@ body {
     box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.15);
 }
 
-.upload-area {
-    display: flex;
-    gap: 20px;
-    min-height: 300px;
-}
-
-/* 左侧上传区域样式 */
-.upload-left {
-    flex: 1;
-    min-width: 400px;
-}
-
-.excel-uploader {
-    width: 100%;
-}
-
-.el-upload-dragger {
-    width: 100%;
-    height: 300px !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.el-icon-upload {
-    font-size: 48px;
-    color: #909399;
-    margin-bottom: 15px;
-}
-
-.el-upload__text {
-    color: #606266;
-    font-size: 14px;
-    margin: 8px 0;
-}
-
-.el-upload__text em {
-    color: #409EFF;
-    font-style: normal;
-    cursor: pointer;
-}
-
-.el-upload__tip {
-    font-size: 12px;
-    color: #909399;
-}
-
-/* 右侧文件列表样式 */
-.upload-right {
-    width: 300px;
-    border-left: 1px solid #EBEEF5;
-    padding-left: 20px;
-}
-
-.file-list-header {
-    font-size: 16px;
-    color: #303133;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #EBEEF5;
-}
-
 .file-list {
     height: calc(100% - 45px);
     overflow-y: auto;
@@ -338,21 +325,6 @@ body {
 .column-selection .file-columns-item .el-form-item__label {
     font-size: 16px;
     font-weight: bold;
-}
-
-/* 文件列表容器样式优化 */
-.file-list-container {
-    padding: 24px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #ebeef5;
-}
-
-.file-list-container h3 {
-    margin: 0 0 16px 0;
-    color: #303133;
-    font-size: 16px;
-    font-weight: 600;
 }
 
 /* 比对表单区域样式优化 */

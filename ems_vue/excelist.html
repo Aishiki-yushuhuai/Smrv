@@ -40,7 +40,7 @@
 								<el-col :span="12">
 									<el-upload
 										class="excel-uploader"
-										action="http://yourip:7474/smrv/excel/upload"
+										action="http://localhost:7474/smrv/excel/upload"
 										:on-success="handleUploadSuccess"
 										:on-error="handleUploadError"
 										:before-upload="beforeUpload"
@@ -341,7 +341,7 @@
 							console.log('JSON 字符串:', JSON.stringify(params, null, 2));
 							console.log('========================');
 
-							const response = await axios.post('http://yourip:7474/smrv/excel/compare', params);
+							const response = await axios.post('http://localhost:7474/smrv/excel/compare', params);
 							
 							console.log('接收到比对响应：', response.data);
 							
@@ -378,7 +378,7 @@
 
 						try {
 							this.downloading = true;
-							window.location.href = `http://yourip:7474/smrv/excel/download/${this.downloadId}`;
+							window.location.href = `http://localhost:7474/smrv/excel/download/${this.downloadId}`;
 							this.$message.success('开始下载比对结果');
 						} catch (error) {
 							console.error('下载错误：', error);
@@ -402,7 +402,7 @@
 					// 获取已上传的文件列表
 					async fetchUploadedFiles() {
 						try {
-							const response = await axios.get('http://yourip:7474/smrv/excel/files');
+							const response = await axios.get('http://localhost:7474/smrv/excel/files');
 							if (response.data.success) {
 								const files = response.data.data;
 								// 更新文件列表和对应的列信息

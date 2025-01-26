@@ -23,7 +23,7 @@
 				<tr v-for="(emp,index) in emps" :key="emp.id">
 					<td>{{emp.id}}</td>
 					<td>{{emp.name}}</td>
-					<td><img :src="'http://yourip:7474/smrv/' + emp.path" height="50"></td>
+					<td><img :src="'http://localhost:7474/smrv/' + emp.path" height="50"></td>
 					<td>{{emp.salary}}</td>
 					<td>{{emp.age}}</td>
 					<td>
@@ -52,7 +52,7 @@
 					//删除员工的操作
 					delEmp(id){
 						if(confirm("是否确认删除？")){
-							axios.delete("http://yourip:7474/smrv/emp/delete/" + id).then(res =>{
+							axios.delete("http://localhost:7474/smrv/emp/delete/" + id).then(res =>{
 								if(res.data.state){
 									alert(res.data.msg);
 									//刷新页面
@@ -64,7 +64,7 @@
 						}
 					},
 					findAll(){
-						axios.get("http://yourip:7474/smrv/emp/findAll").then(res=>{
+						axios.get("http://localhost:7474/smrv/emp/findAll").then(res=>{
 							this.emps = res.data
 						});
 					}

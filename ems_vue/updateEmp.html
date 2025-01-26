@@ -18,7 +18,7 @@
 				</tr>
 				<tr>
 					<td>old photo:</td>
-					<td><img :src="'http://yourip:7474/smrv/' + emp.path" height="50"/></td>
+					<td><img :src="'http://localhost:7474/smrv/' + emp.path" height="50"/></td>
 				</tr>
 				<tr>
 					<td>name:</td>
@@ -73,7 +73,7 @@
 						formData.append("photo",this.$refs.photo.files[0]);
 						axios({
 							method : "put",
-							url : "http://yourip:7474/smrv/emp/update",
+							url : "http://localhost:7474/smrv/emp/update",
 							data : formData,
 							headers:{
 								'content-type':'mutipart/formdata'
@@ -103,7 +103,7 @@
 					console.log(id);
 					//查询信息
 					let _this = this;
-					axios.get("http://yourip:7474/smrv/emp/findOne/" + id).then(res=>{
+					axios.get("http://localhost:7474/smrv/emp/findOne/" + id).then(res=>{
 						console.log(res.data)
 						_this.emp = res.data;
 						
